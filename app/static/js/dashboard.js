@@ -178,14 +178,18 @@
     els.updatedAt.textContent = new Date(reading.timestamp).toLocaleTimeString();
 
     els.tempValue.textContent = fmt(temp.celsius);
-    setTag(
-      els.tempTag,
-      temp.connected ? "Connected" : "No sensor",
-      temp.connected ? "ok" : "bad"
-    );
-    els.tempNote.textContent = temp.connected
-      ? "DS18B20 probe"
-      : "DS18B20 not detected — check DATA on A1 + 4.7k pull-up to 5V";
+    if (temp.mocked) {
+      setTag(els.tempTag, "Mock", "warn");
+      els.tempNote.textContent =
+        "Mock temperature (DS18B20 offline) · turbidity & level are live";
+    } else if (temp.connected) {
+      setTag(els.tempTag, "Connected", "ok");
+      els.tempNote.textContent = "DS18B20 probe";
+    } else {
+      setTag(els.tempTag, "No sensor", "bad");
+      els.tempNote.textContent =
+        "DS18B20 not detected — check DATA on A1 + 4.7k pull-up to 5V";
+    }
     els.tempSecondary.textContent =
       temp.fahrenheit != null ? `${fmt(temp.fahrenheit)} °F` : "— °F";
     setGauge(els.tempArc, temp.celsius, 50);

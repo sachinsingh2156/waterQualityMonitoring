@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import math
 import threading
 import time
 from datetime import datetime, timezone
@@ -19,6 +20,12 @@ if TYPE_CHECKING:
 
 def _now() -> str:
     return datetime.now(timezone.utc).isoformat()
+
+
+def _mock_temperature_c() -> float:
+    """Gentle live-looking mock °C while the DS18B20 is offline."""
+    t = time.time()
+    return round(24.6 + math.sin(t / 15.0) * 1.7 + math.sin(t / 4.0) * 0.2, 2)
 
 
 def _find_port(explicit: str | None) -> str | None:
@@ -83,6 +90,14 @@ def normalize_reading(data: dict) -> dict:
     temp_connected = data.get("tempConnected")
     if temp_connected is None:
         temp_connected = temperature_c is not None
+    temp_connected = bool(temp_connected)
+
+    # Temperature only: use mock values while the DS18B20 is not reporting.
+    temp_mocked = False
+    if (not temp_connected) or temperature_c is None:
+        temperature_c = _mock_temperature_c()
+        temp_mocked = True
+        temp_connected = True
 
     distance_cm = data.get("distanceCm")
     if distance_cm is None and isinstance(data.get("waterLevel"), dict):
@@ -112,6 +127,7 @@ def normalize_reading(data: dict) -> dict:
             "celsius": temperature_c,
             "fahrenheit": fahrenheit,
             "connected": bool(temp_connected),
+            "mocked": temp_mocked,
         },
         "turbidity": {
             "raw": turbidity_raw,
