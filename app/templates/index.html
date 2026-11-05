@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AquaSense — Water Monitoring</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,600;8..60,700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/static/css/dashboard.css" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js" defer></script>
+    <script src="/static/js/dashboard.js" defer></script>
+  </head>
+  <body>
+    <div class="page">
+      <header class="header">
+        <div class="brand">
+          <p class="brand-name">AquaSense</p>
+          <p class="brand-sub">Tank level · turbidity · temperature</p>
+        </div>
+        <div class="header-meta">
+          <div class="meta-item">
+            <span class="meta-label">Link</span>
+            <span class="meta-value" id="ws-status">
+              <span class="status-dot connecting" id="ws-dot"></span>
+              <span id="ws-label">Connecting</span>
+            </span>
+          </div>
+          <div class="meta-item">
+            <span class="meta-label">Source</span>
+            <span class="meta-value" id="data-source">—</span>
+          </div>
+          <div class="meta-item">
+            <span class="meta-label">Updated</span>
+            <span class="meta-value mono" id="updated-at">waiting</span>
+          </div>
+        </div>
+      </header>
+
+      <section class="metrics" aria-label="Live readings">
+        <article class="panel">
+          <div class="panel-top">
+            <h2>Temperature</h2>
+            <span class="tag" id="temp-tag">—</span>
+          </div>
+          <div class="reading">
+            <span class="reading-value mono" id="temp-value">—</span>
+            <span class="reading-unit">°C</span>
+          </div>
+          <p class="panel-note" id="temp-note">Waiting for DS18B20</p>
+          <div class="gauge" aria-hidden="true">
+            <svg viewBox="0 0 200 120" id="temp-gauge">
+              <path class="gauge-track" d="M 30 100 A 70 70 0 0 1 170 100" />
+              <path class="gauge-fill" id="temp-arc" d="M 30 100 A 70 70 0 0 1 170 100" />
+            </svg>
+            <span class="gauge-caption mono" id="temp-secondary">— °F</span>
+          </div>
+        </article>
+
+        <article class="panel">
+          <div class="panel-top">
+            <h2>Turbidity</h2>
+            <span class="tag" id="turb-tag">—</span>
+          </div>
+          <div class="reading">
+            <span class="reading-value mono" id="turb-value">—</span>
+            <span class="reading-unit">dirtiness</span>
+          </div>
+          <p class="panel-note" id="turb-note">Waiting for turbidity reading</p>
+          <div class="gauge" aria-hidden="true">
+            <svg viewBox="0 0 200 120" id="turb-gauge">
+              <path class="gauge-track" d="M 30 100 A 70 70 0 0 1 170 100" />
+              <path class="gauge-fill turb" id="turb-arc" d="M 30 100 A 70 70 0 0 1 170 100" />
+            </svg>
+            <span class="gauge-caption mono" id="turb-raw">Raw ADC —</span>
+          </div>
+        </article>
+
+        <article class="panel">
+          <div class="panel-top">
+            <h2>Water level</h2>
+            <span class="tag" id="level-tag">—</span>
+          </div>
+          <div class="reading">
+            <span class="reading-value mono" id="level-value">—</span>
+            <span class="reading-unit">% full</span>
+          </div>
+          <p class="panel-note" id="level-note">HC-SR04 ultrasonic</p>
+          <div class="level-block">
+            <div class="tank" aria-hidden="true">
+              <div class="tank-fill" id="tank-fill"></div>
+            </div>
+            <dl class="level-stats">
+              <div>
+                <dt>Water height</dt>
+                <dd class="mono" id="level-cm">—</dd>
+              </div>
+              <div>
+                <dt>Sensor distance</dt>
+                <dd class="mono" id="level-distance">—</dd>
+              </div>
+              <div>
+                <dt>Tank height</dt>
+                <dd class="mono" id="level-tank">—</dd>
+              </div>
+            </dl>
+          </div>
+        </article>
+      </section>
+
+      <section class="panel chart-panel">
+        <div class="panel-top">
+          <h2>Trends</h2>
+          <span class="panel-aside">Last 60 samples</span>
+        </div>
+        <div class="chart-wrap">
+          <canvas id="trend-chart" height="110"></canvas>
+        </div>
+      </section>
+
+      <section class="system-strip" aria-label="System status">
+        <div class="system-item">
+          <span class="meta-label">Transport</span>
+          <p>WebSocket pub/sub on <code>sensors/water/data</code></p>
+        </div>
+        <div class="system-item">
+          <span class="meta-label">Publisher</span>
+          <p id="status-message">Awaiting publisher status.</p>
+        </div>
+        <div class="system-item">
+          <span class="meta-label">Quality</span>
+          <p id="quality-message">No turbidity classification yet.</p>
+        </div>
+      </section>
+
+      <footer class="footer">
+        <span>AquaSense · Python FastAPI</span>
+        <span class="mono">sensors/water/data · sensors/water/status</span>
+      </footer>
+    </div>
+  </body>
+</html>
